@@ -5,18 +5,25 @@ A small fullstack ERP-style web application for managing products, inventory, su
 ## Overview
 
 This project is a mini ERP system built as a fullstack application.  
-It provides a simple inventory management dashboard where users can view products, add new items and delete existing entries.
+It provides an inventory management dashboard where users can create, view, edit and delete products. It also includes stock booking, search and filter functionality.
 
-The goal of this project is to demonstrate practical fullstack development, REST API usage, frontend state management and basic ERP-related business processes such as product and stock management.
+The goal of this project is to demonstrate practical fullstack development, REST API usage, database integration and ERP-related business processes such as product, stock and supplier management.
 
 ## Features
 
 - Product overview
 - Add new products
+- Edit existing products
 - Delete products
+- Stock booking with +1, +10 and -1
+- Protection against negative stock values
+- Search by article number, product name or supplier
+- Filter by category
+- Filter by stock status
 - Inventory stock calculation
 - Total warehouse value calculation
 - Supplier information
+- MongoDB persistence
 - REST API integration
 - Responsive dashboard UI
 
@@ -33,7 +40,10 @@ The goal of this project is to demonstrate practical fullstack development, REST
 
 - Node.js
 - Express
+- MongoDB
+- Mongoose
 - CORS
+- dotenv
 
 ## Project Structure
 
@@ -44,27 +54,21 @@ mini-erp-system/
 │   ├── package.json
 │   └── vite.config.js
 ├── server/
+│   ├── models/
+│   │   └── Product.js
 │   ├── index.js
-│   └── package.json
+│   ├── package.json
+│   └── .env.example
 ├── README.md
 └── .gitignore
-## API Endpoints
-
-### Get all products
-
-```txt
+API Endpoints
+Get all products
 GET /api/products
-```
-
-### Add a new product
-
-```txt
+Add a new product
 POST /api/products
-```
 
 Example body:
 
-```json
 {
   "articleNumber": "MAT-1003",
   "name": "Keyboard",
@@ -73,64 +77,59 @@ Example body:
   "price": 49.99,
   "supplier": "Office Supplier GmbH"
 }
-```
+Update a product
+PUT /api/products/:id
+Update product stock
+PATCH /api/products/:id/stock
 
-### Delete a product
+Example body:
 
-```txt
+{
+  "quantityChange": 10
+}
+Delete a product
 DELETE /api/products/:id
-```
+Environment Variables
 
-## Getting Started
+Create a .env file inside the server folder:
 
-### 1. Clone the repository
+MONGO_URI=your_mongodb_connection_string
+PORT=5000
 
-```bash
+The .env file is ignored by Git and should not be committed.
+
+Getting Started
+1. Clone the repository
 git clone https://github.com/MEHMET24092000/mini-erp-system.git
 cd mini-erp-system
-```
-
-### 2. Start the backend
-
-```bash
+2. Install and start the backend
 cd server
 npm install
 npm run dev
-```
 
 The backend runs on:
 
-```txt
 http://localhost:5000
-```
-
-### 3. Start the frontend
+3. Install and start the frontend
 
 Open a second terminal:
 
-```bash
 cd client
 npm install
 npm run dev
-```
 
 The frontend runs on:
 
-```txt
 http://localhost:5173
-```
+Future Improvements
+Purchase order management
+Goods receipt process
+Supplier management
+User authentication
+Dashboard charts
+Role-based access
+Deployment of frontend and backend
+Author
 
-## Future Improvements
-
-- MongoDB database integration
-- Edit product functionality
-- Purchase order management
-- Goods receipt process
-- User authentication
-- Dashboard charts
-- Search and filter functions
-
-## Author
-
-Tunc Mehmet  
-GitHub: [MEHMET24092000](https://github.com/MEHMET24092000)
+Tunc Mehmet
+GitHub: MEHMET24092000
