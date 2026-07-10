@@ -15,6 +15,10 @@ function App() {
     supplier: "",
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [stockFilter, setStockFilter] = useState("all");
+
   async function loadProducts() {
     try {
       const response = await fetch(API_URL);
@@ -104,6 +108,28 @@ function App() {
       console.error("Fehler beim Löschen:", error);
     }
   }
+
+  const categories = [...new Set(products.map((product) => product.category))];
+
+  const filteredProducts = products.filter((product) => {
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      product.articleNumber.toLowerCase().includes(search) ||
+      product.name.toLowerCase().includes(search) ||
+      product.supplier.toLowerCase().includes(search);
+
+    const matchesCategory =
+      categoryFilter === "" || product.category === categoryFilter;
+
+    const matchesStock =
+      stockFilter === "all" ||
+      (stockFilter === "available" && Number(product.stock) > 0) ||
+      (stockFilter === "low" && Number(product.stock) > 0 && Number(product.stock) <= 5) ||
+      (stockFilter === "out" && Number(product.stock) === 0);
+
+    return matchesSearch && matchesCategory && matchesStock;
+  });
 
   const totalProducts = products.length;
   const totalStock = products.reduce(
@@ -203,7 +229,47 @@ function App() {
         </form>
 
         <section className="table-card">
-          <h2>Artikelübersicht</h2>
+          <div className="table-header">
+            <div>
+              <h2>Artikelübersicht</h2>
+              <p className="filter-summary">
+                {filteredProducts.length} von {products.length} Artikeln werden angezeigt
+              </p>
+            </div>
+          </div>
+
+          <div className="filters">
+            <input
+              className="filter-control"
+              placeholder="Suchen nach Artikelnummer, Name oder Lieferant..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+
+            <select
+              className="filter-control"
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+            >
+              <option value="">Alle Kategorien</option>
+              {categories.map((category) => (
+                <option value={category} key={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="filter-control"
+              value={stockFilter}
+              onChange={(event) => setStockFilter(event.target.value)}
+            >
+              <option value="all">Alle Bestände</option>
+              <option value="available">Verfügbar</option>
+              <option value="low">Niedriger Bestand</option>
+              <option value="out">Ausverkauft</option>
+            </select>
+          </div>
 
           <div className="table-wrapper">
             <table>
@@ -221,7 +287,7 @@ function App() {
               </thead>
 
               <tbody>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product.id}>
                     <td>{product.articleNumber}</td>
                     <td>{product.name}</td>
@@ -273,6 +339,12 @@ function App() {
                 ))}
               </tbody>
             </table>
+
+            {filteredProducts.length === 0 && (
+              <p className="empty-state">
+                Keine Artikel gefunden. Passe die Suche oder Filter an.
+              </p>
+            )}
           </div>
         </section>
       </section>

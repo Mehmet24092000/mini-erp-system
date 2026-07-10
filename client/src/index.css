@@ -1,39 +1,46 @@
-.stock-badge {
-  display: inline-flex;
-  justify-content: center;
-  min-width: 42px;
-  padding: 7px 10px;
-  border-radius: 999px;
-  background: rgba(34, 197, 94, 0.16);
-  color: #bbf7d0;
-  font-weight: 900;
-}
-
-.stock-badge.low {
-  background: rgba(239, 68, 68, 0.16);
-  color: #fecaca;
-}
-
-.stock-actions {
+.table-header {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
 }
 
-.stock-btn {
-  border: none;
-  cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 999px;
-  font-weight: 900;
+.filter-summary {
+  color: #94a3b8;
+  font-size: 14px;
+  margin-top: -8px;
 }
 
-.stock-btn.plus {
-  background: rgba(34, 197, 94, 0.16);
-  color: #bbf7d0;
+.filters {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.stock-btn.minus {
-  background: rgba(245, 158, 11, 0.16);
-  color: #fde68a;
+.filter-control {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.8);
+  color: #f8fafc;
+  outline: none;
+}
+
+.filter-control::placeholder {
+  color: #94a3b8;
+}
+
+.empty-state {
+  text-align: center;
+  color: #94a3b8;
+  padding: 28px;
+}
+
+@media (max-width: 980px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
 }
