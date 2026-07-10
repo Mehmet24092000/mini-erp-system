@@ -15,6 +15,7 @@ function App() {
     supplier: "",
   });
 
+  const [editingProductId, setEditingProductId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [stockFilter, setStockFilter] = useState("all");
@@ -33,6 +34,19 @@ function App() {
     loadProducts();
   }, []);
 
+  function resetForm() {
+    setFormData({
+      articleNumber: "",
+      name: "",
+      category: "",
+      stock: "",
+      price: "",
+      supplier: "",
+    });
+
+    setEditingProductId(null);
+  }
+
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -45,33 +59,51 @@ function App() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    const url = editingProductId
+      ? `${API_URL}/${editingProductId}`
+      : API_URL;
+
+    const method = editingProductId ? "PUT" : "POST";
+
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        alert("Bitte alle Felder ausfüllen.");
+        alert(data.message || "Bitte alle Felder ausfüllen.");
         return;
       }
 
-      setFormData({
-        articleNumber: "",
-        name: "",
-        category: "",
-        stock: "",
-        price: "",
-        supplier: "",
-      });
-
+      resetForm();
       loadProducts();
     } catch (error) {
       console.error("Fehler beim Speichern:", error);
     }
+  }
+
+  function startEditing(product) {
+    setEditingProductId(product.id);
+
+    setFormData({
+      articleNumber: product.articleNumber,
+      name: product.name,
+      category: product.category,
+      stock: String(product.stock),
+      price: String(product.price),
+      supplier: product.supplier,
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
   async function updateStock(id, quantityChange) {
@@ -103,6 +135,10 @@ function App() {
         method: "DELETE",
       });
 
+      if (editingProductId === id) {
+        resetForm();
+      }
+
       loadProducts();
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
@@ -125,7 +161,9 @@ function App() {
     const matchesStock =
       stockFilter === "all" ||
       (stockFilter === "available" && Number(product.stock) > 0) ||
-      (stockFilter === "low" && Number(product.stock) > 0 && Number(product.stock) <= 5) ||
+      (stockFilter === "low" &&
+        Number(product.stock) > 0 &&
+        Number(product.stock) <= 5) ||
       (stockFilter === "out" && Number(product.stock) === 0);
 
     return matchesSearch && matchesCategory && matchesStock;
@@ -178,7 +216,11 @@ function App() {
 
       <section className="content-grid">
         <form className="form-card" onSubmit={handleSubmit}>
-          <h2>Neuen Artikel anlegen</h2>
+          <h2>
+            {editingProductId
+              ? "Artikel bearbeiten"
+              : "Neuen Artikel anlegen"}
+          </h2>
 
           <input
             name="articleNumber"
@@ -225,7 +267,21 @@ function App() {
             onChange={handleChange}
           />
 
-          <button type="submit">Artikel speichern</button>
+          <div className="form-actions">
+            <button type="submit">
+              {editingProductId ? "Änderungen speichern" : "Artikel speichern"}
+            </button>
+
+            {editingProductId && (
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={resetForm}
+              >
+                Abbrechen
+              </button>
+            )}
+          </div>
         </form>
 
         <section className="table-card">
@@ -233,7 +289,8 @@ function App() {
             <div>
               <h2>Artikelübersicht</h2>
               <p className="filter-summary">
-                {filteredProducts.length} von {products.length} Artikeln werden angezeigt
+                {filteredProducts.length} von {products.length} Artikeln werden
+                angezeigt
               </p>
             </div>
           </div>
@@ -282,7 +339,7 @@ function App() {
                   <th>Preis</th>
                   <th>Lieferant</th>
                   <th>Bestand buchen</th>
-                  <th></th>
+                  <th>Aktionen</th>
                 </tr>
               </thead>
 
@@ -295,7 +352,9 @@ function App() {
                     <td>
                       <span
                         className={
-                          product.stock <= 5 ? "stock-badge low" : "stock-badge"
+                          product.stock <= 5
+                            ? "stock-badge low"
+                            : "stock-badge"
                         }
                       >
                         {product.stock}
@@ -328,12 +387,21 @@ function App() {
                       </div>
                     </td>
                     <td>
-                      <button
-                        className="delete-btn"
-                        onClick={() => deleteProduct(product.id)}
-                      >
-                        Löschen
-                      </button>
+                      <div className="row-actions">
+                        <button
+                          className="edit-btn"
+                          onClick={() => startEditing(product)}
+                        >
+                          Bearbeiten
+                        </button>
+
+                        <button
+                          className="delete-btn"
+                          onClick={() => deleteProduct(product.id)}
+                        >
+                          Löschen
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

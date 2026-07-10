@@ -28,6 +28,19 @@ let products = [
   },
 ];
 
+function validateProductData(data) {
+  const { articleNumber, name, category, stock, price, supplier } = data;
+
+  return (
+    articleNumber &&
+    name &&
+    category &&
+    stock !== undefined &&
+    price !== undefined &&
+    supplier
+  );
+}
+
 app.get("/", (req, res) => {
   res.json({
     message: "Mini ERP API läuft",
@@ -39,20 +52,13 @@ app.get("/api/products", (req, res) => {
 });
 
 app.post("/api/products", (req, res) => {
-  const { articleNumber, name, category, stock, price, supplier } = req.body;
-
-  if (
-    !articleNumber ||
-    !name ||
-    !category ||
-    stock === undefined ||
-    price === undefined ||
-    !supplier
-  ) {
+  if (!validateProductData(req.body)) {
     return res.status(400).json({
       message: "Bitte alle Felder ausfüllen.",
     });
   }
+
+  const { articleNumber, name, category, stock, price, supplier } = req.body;
 
   const newProduct = {
     id: Date.now(),
@@ -67,6 +73,43 @@ app.post("/api/products", (req, res) => {
   products.push(newProduct);
 
   res.status(201).json(newProduct);
+});
+
+app.put("/api/products/:id", (req, res) => {
+  const productId = Number(req.params.id);
+
+  if (!validateProductData(req.body)) {
+    return res.status(400).json({
+      message: "Bitte alle Felder ausfüllen.",
+    });
+  }
+
+  const productIndex = products.findIndex((product) => product.id === productId);
+
+  if (productIndex === -1) {
+    return res.status(404).json({
+      message: "Artikel wurde nicht gefunden.",
+    });
+  }
+
+  const { articleNumber, name, category, stock, price, supplier } = req.body;
+
+  const updatedProduct = {
+    id: productId,
+    articleNumber,
+    name,
+    category,
+    stock: Number(stock),
+    price: Number(price),
+    supplier,
+  };
+
+  products[productIndex] = updatedProduct;
+
+  res.json({
+    message: "Artikel wurde aktualisiert.",
+    product: updatedProduct,
+  });
 });
 
 app.patch("/api/products/:id/stock", (req, res) => {
