@@ -69,6 +69,40 @@ app.post("/api/products", (req, res) => {
   res.status(201).json(newProduct);
 });
 
+app.patch("/api/products/:id/stock", (req, res) => {
+  const productId = Number(req.params.id);
+  const { quantityChange } = req.body;
+
+  const product = products.find((item) => item.id === productId);
+
+  if (!product) {
+    return res.status(404).json({
+      message: "Artikel wurde nicht gefunden.",
+    });
+  }
+
+  if (quantityChange === undefined || Number.isNaN(Number(quantityChange))) {
+    return res.status(400).json({
+      message: "Bitte eine gültige Bestandsänderung angeben.",
+    });
+  }
+
+  const newStock = product.stock + Number(quantityChange);
+
+  if (newStock < 0) {
+    return res.status(400).json({
+      message: "Der Lagerbestand darf nicht unter 0 fallen.",
+    });
+  }
+
+  product.stock = newStock;
+
+  res.json({
+    message: "Lagerbestand wurde aktualisiert.",
+    product,
+  });
+});
+
 app.delete("/api/products/:id", (req, res) => {
   const productId = Number(req.params.id);
 

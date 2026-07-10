@@ -70,6 +70,29 @@ function App() {
     }
   }
 
+  async function updateStock(id, quantityChange) {
+    try {
+      const response = await fetch(`${API_URL}/${id}/stock`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ quantityChange }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Bestand konnte nicht aktualisiert werden.");
+        return;
+      }
+
+      loadProducts();
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren des Bestands:", error);
+    }
+  }
+
   async function deleteProduct(id) {
     try {
       await fetch(`${API_URL}/${id}`, {
@@ -83,9 +106,12 @@ function App() {
   }
 
   const totalProducts = products.length;
-  const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
+  const totalStock = products.reduce(
+    (sum, product) => sum + Number(product.stock),
+    0
+  );
   const totalValue = products.reduce(
-    (sum, product) => sum + product.stock * product.price,
+    (sum, product) => sum + Number(product.stock) * Number(product.price),
     0
   );
 
@@ -189,6 +215,7 @@ function App() {
                   <th>Bestand</th>
                   <th>Preis</th>
                   <th>Lieferant</th>
+                  <th>Bestand buchen</th>
                   <th></th>
                 </tr>
               </thead>
@@ -199,9 +226,41 @@ function App() {
                     <td>{product.articleNumber}</td>
                     <td>{product.name}</td>
                     <td>{product.category}</td>
-                    <td>{product.stock}</td>
-                    <td>{product.price.toFixed(2)} €</td>
+                    <td>
+                      <span
+                        className={
+                          product.stock <= 5 ? "stock-badge low" : "stock-badge"
+                        }
+                      >
+                        {product.stock}
+                      </span>
+                    </td>
+                    <td>{Number(product.price).toFixed(2)} €</td>
                     <td>{product.supplier}</td>
+                    <td>
+                      <div className="stock-actions">
+                        <button
+                          className="stock-btn plus"
+                          onClick={() => updateStock(product.id, 1)}
+                        >
+                          +1
+                        </button>
+
+                        <button
+                          className="stock-btn plus"
+                          onClick={() => updateStock(product.id, 10)}
+                        >
+                          +10
+                        </button>
+
+                        <button
+                          className="stock-btn minus"
+                          onClick={() => updateStock(product.id, -1)}
+                        >
+                          -1
+                        </button>
+                      </div>
+                    </td>
                     <td>
                       <button
                         className="delete-btn"
