@@ -180,6 +180,6 @@ app.delete("/api/products/:id", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Mini ERP Server läuft auf http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Mini ERP API läuft auf Port ${PORT}`);
 });
