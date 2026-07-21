@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import "./index.css";
 
-const API_URL = "http://localhost:5000/api/products";
-
+const API_URL = "https://mini-erp-system-56nk.onrender.com/api/products";
 function App() {
   const [products, setProducts] = useState([]);
 
