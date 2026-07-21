@@ -11,6 +11,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+app.get("/api/debug", (req, res) => {
+  res.json({
+    mongoUriExists: Boolean(process.env.MONGO_URI),
+    mongoUriStartsCorrectly: process.env.MONGO_URI?.startsWith("mongodb+srv://"),
+  });
+});
+
 function validateProductData(data) {
   const { articleNumber, name, category, stock, price, supplier } = data;
 
@@ -41,11 +48,14 @@ app.get("/", (req, res) => {
 
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const products = await Product.find();
     res.json(products);
   } catch (error) {
+    console.error("Fehler beim Laden der Produkte:", error);
+
     res.status(500).json({
       message: "Produkte konnten nicht geladen werden.",
+      error: error.message,
     });
   }
 });
